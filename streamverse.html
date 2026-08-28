@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamVerse - App de Vídeos</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --surface-color: #1f1f1f;
+            --hover-color: #2b2b2b;
+            --text-main: #ffffff;
+            --text-secondary: #aaa;
+            --accent-color: #ff0033;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- CABEÇALHO / NAVBAR --- */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            border-bottom: 1px solid #222;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        .search-box {
+            display: flex;
+            width: 40%;
+            max-width: 500px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: #121212;
+            border: 1px solid #333;
+            padding: 8px 14px;
+            border-radius: 20px 0 0 20px;
+            color: white;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .search-box button {
+            background: #222;
+            border: 1px solid #333;
+            border-left: none;
+            padding: 0 16px;
+            border-radius: 0 20px 20px 0;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        /* --- TELA PRINCIPAL (GRID) --- */
+        .main-container {
+            margin-top: 80px;
+            padding: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface-color);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            background: var(--hover-color);
+        }
+
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-info {
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #444;
+            flex-shrink: 0;
+        }
+
+        .details h3 {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            line-height: 1.2rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .details p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* --- TELA DE PLAYER (MODAL / FULLVIEW) --- */
+        #player-view {
+            display: none;
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 100%;
+            height: calc(100vh - 60px);
+            background: var(--bg-color);
+            z-index: 900;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .player-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .video-responsive {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .video-responsive iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .player-info {
+            margin-top: 15px;
+        }
+
+        .player-info h2 {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .back-btn {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho do App -->
+    <header>
+        <div class="logo" onclick="voltarHome()">Stream<span>Verse</span></div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Pesquisar vídeos..." oninput="filtrarVideos()">
+            <button>🔍</button>
+        </div>
+    </header>
+
+    <!-- Tela 1: Grade de Mais de 50 Vídeos -->
+    <div class="main-container" id="homeView">
+        <div class="grid" id="videoGrid"></div>
+    </div>
+
+    <!-- Tela 2: Player Dinâmico -->
+    <div id="player-view">
+        <div class="player-container">
+            <button class="back-btn" onclick="voltarHome()">← Voltar</button>
+            <div class="video-responsive">
+                <iframe id="activeIframe" src="" allowfullscreen></iframe>
+            </div>
+            <div class="player-info">
+                <h2 id="activeTitle">Título do Vídeo</h2>
+                <p id="activeDetails">Canal • Visualizações</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados simulado com IDs reais de trailers do YouTube
+        const youtubeIds = [
+            "fKopy74weus", "JfVOs4VSpmA", "g4Hbz2jLxvQ", "s8XjcuLYMiZ", "8Qn_spdM5Zg",
+            "9ix7TUGVYIo", "d9MyW72ELq0", "TcMBFSGVi1c", "Sbclqg4XaZs", "EXeTwQWrcwY",
+            "Zi803QQeW7c", "1La4QzGeaaQ", "qEVUtrk8_B4", "Uq9unH4WMg8", "JvHy6PFxN2M"
+        ];
+
+        const temas = [
+            "Trailer de Ação: O Despertar Cibernético",
+            "Animação 3D: A Batalha nas Nuvens",
+            "Ficção Científica: Missão Neo-Átria",
+            "Filme Completo - Curtas de Animação",
+            "Guerra Galáctica: Batalha Final",
+            "Perseguição Impossível no Distrito 9"
+        ];
+
+        const canais = ["CineAction", "MotionLab", "CyberVisions", "Epic Trailers BR", "Animation World"];
+
+        let database = [];
+
+        // Gerar 54 vídeos dinamicamente para abastecer o aplicativo
+        for (let i = 1; i <= 54; i++) {
+            database.push({
+                id: i,
+                ytId: youtubeIds[(i - 1) % youtubeIds.length],
+                title: `${temas[i % temas.length]} #${i}`,
+                channel: canais[i % canais.length],
+                views: `${(Math.random() * 50 + 1).toFixed(1)} mil`,
+                time: `${(i % 30) + 1} dias atrás`
+            });
+        }
+
+        const gridEl = document.getElementById('videoGrid');
+        const homeView = document.getElementById('homeView');
+        const playerView = document.getElementById('player-view');
+        const activeIframe = document.getElementById('activeIframe');
+        const activeTitle = document.getElementById('activeTitle');
+        const activeDetails = document.getElementById('activeDetails');
+
+        // Renderizar a grade de vídeos na tela inicial
+        function renderizarGrid(lista) {
+            gridEl.innerHTML = "";
+            lista.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => abrirPlayer(video);
+
+                card.innerHTML = `
+                    <div class="thumbnail">
+                        <img src="https://img.youtube.com/vi/${video.ytId}/hqdefault.jpg" alt="${video.title}">
+                    </div>
+                    <div class="card-info">
+                        <div class="avatar" style="background: hsl(${video.id * 35}, 70%, 50%);"></div>
+                        <div class="details">
+                            <h3>${video.title}</h3>
+                            <p>${video.channel} • ${video.views} visualizações</p>
+                        </div>
+                    </div>
+                `;
+                gridEl.appendChild(card);
+            });
+        }
+
+        // Abrir o player dinâmico ao clicar em um vídeo
+        function abrirPlayer(video) {
+            homeView.style.display = 'none';
+            playerView.style.display = 'block';
+            activeIframe.src = `https://www.youtube.com/embed/${video.ytId}?autoplay=1`;
+            activeTitle.innerText = video.title;
+            activeDetails.innerText = `${video.channel} • ${video.views} visualizações • ${video.time}`;
+            window.scrollTo(0, 0);
+        }
+
+        // Voltar para a tela principal
+        function voltarHome() {
+            playerView.style.display = 'none';
+            homeView.style.display = 'block';
+            activeIframe.src = ""; // Para o vídeo parar de rodar
+        }
+
+        // Sistema de busca em tempo real
+        function filtrarVideos() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const filtrados = database.filter(v => v.title.toLowerCase().includes(termo) || v.channel.toLowerCase().includes(termo));
+            renderizarGrid(filtrados);
+        }
+
+        // Inicializar o app carregando a base de dados
+        renderizarGrid(database);
+    </script>
+</body>
+</html>
