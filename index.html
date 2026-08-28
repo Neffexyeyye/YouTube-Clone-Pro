@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlix - Início</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --surface-color: #212121;
+            --text-main: #ffffff;
+            --text-secondary: #aaa;
+            --accent-color: #ff0000;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Barra Superior */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 56px;
+            background-color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            box-sizing: border-box;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo span {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Grade de Vídeos */
+        .container {
+            margin-top: 80px;
+            padding: 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .video-card {
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .thumbnail-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .thumbnail-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .video-card:hover iframe {
+            opacity: 1;
+        }
+
+        .video-info {
+            display: flex;
+            gap: 12px;
+        }
+
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #555;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .video-details h3 {
+            font-size: 0.95rem;
+            margin: 0 0 6px 0;
+            line-height: 1.4rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .video-details p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo"><span>ANIME</span>Stream</div>
+        <div style="font-size: 0.9rem; color: var(--text-secondary);">Modo Tela Inicial (50+ Vídeos)</div>
+    </header>
+
+    <div class="container" id="video-grid"></div>
+
+    <script>
+        // Lista de IDs de trailers reais do YouTube (Animações, Filmes de Ação e Sci-Fi)
+        const youtubeIds = [
+            "fKopy74weus", "JfVOs4VSpmA", "g4Hbz2jLxvQ", "s8XjcuLYMiZ", "8Qn_spdM5Zg",
+            "9ix7TUGVYIo", "d9MyW72ELq0", "TcMBFSGVi1c", "Sbclqg4XaZs", "EXeTwQWrcwY",
+            "Zi803QQeW7c", "1La4QzGeaaQ", "qEVUtrk8_B4", "Uq9unH4WMg8", "JvHy6PFxN2M",
+            "vKQi3bBA1y8", "A03wVqHqD5Y", "zSWdZVtXT7E", "2QKgurwzLvg", "b9EkMc79ZSU"
+        ];
+
+        const titles = [
+            "Trailer Épico de Ação: A Queda dos Titãs",
+            "Animação 4D: O Segredo do Vale Sombrio",
+            "Cyberpunk 2099: Batalha nas Ruas de Neo-Átria",
+            "Confronto Final - Cena Completa Live-Action",
+            "O Despertar da Fronteira (Bastidores de Animação)",
+            "Guerra Galáctica: Crônicas do Amanhã",
+            "Fuga Impossível: O Resgate do Núcleo",
+            "Legião Mecânica: A Era das Máquinas",
+            "Além do Horizonte: Mistérios do Espaço Profundo",
+            "Fúria Urbana: Perseguição de Alta Velocidade"
+        ];
+
+        const channels = [
+            "CineAction Oficial", "MotionLab Studios", "Epic Trailers BR", 
+            "CyberVisions", "AnimaMaster 3D", "Futuristic Channel"
+        ];
+
+        const grid = document.getElementById('video-grid');
+
+        // Gerar dinamicamente mais de 50 vídeos combinando os IDs disponíveis
+        const totalVideosToGenerate = 54;
+
+        for (let i = 1; i <= totalVideosToGenerate; i++) {
+            // Escolhe um ID de forma rotativa/aleatória
+            const randomId = youtubeIds[(i - 1) % youtubeIds.length];
+            const randomTitle = titles[(i * 3) % titles.length] + ` #${i}`;
+            const randomChannel = channels[i % channels.length];
+            const randomViews = (Math.random() * 90 + 1).toFixed(1);
+            const randomDays = (i % 30) + 1;
+
+            const card = document.createElement('div');
+            card.className = 'video-card';
+            
+            card.innerHTML = `
+                <div class="thumbnail-container">
+                    <iframe src="https://www.youtube.com/embed/${randomId}?enablejsapi=1&controls=0&modestbranding=1&rel=0" 
+                            title="${randomTitle}" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            loading="lazy">
+                    </iframe>
+                </div>
+                <div class="video-info">
+                    <div class="channel-avatar" style="background: hsl(${i * 45}, 70%, 50%);"></div>
+                    <div class="video-details">
+                        <h3>${randomTitle}</h3>
+                        <p>${randomChannel}</p>
+                        <p>${randomViews} mil visualizações • há ${randomDays} dias</p>
+                    </div>
+                </div>
+            `;
+            
+            grid.appendChild(card);
+        }
+    </script>
+</body>
+</html>
